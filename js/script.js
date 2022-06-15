@@ -23,8 +23,6 @@ const zip_input =  document.getElementById("zip")
 const cvv_input =  document.getElementById("cvv")
 const paypal_div = document.getElementById("paypal")
 const bitcoin_div = document.getElementById("bitcoin")
-//const register_btn = document.querySelector('button[type=submit]')
-
 
 let activitiesChecked = []
 let activityCost = 0
@@ -45,10 +43,17 @@ paymentOptions[1].setAttribute('selected', true)
 paypal_div.style.display = 'none'
 bitcoin_div.style.display = 'none'
 
-//disable submit btn
-//register_btn.classList.add('disabled')
+//display the "other" job title input field 
+jobRole_select.addEventListener("change", (e) => {
+    if (e.target.value === 'other'){
+        otherJob_input.style.display = 'block'
+    }else{
+        otherJob_input.style.display = "none"
+    }
+})
 
-//function that resets the displace property for all color options
+
+//function that resets the display property for all color options
 const resetTshirtColorDisplay = function (tShirtColorOpts){
     tShirtColorOpts.forEach(
         function(node){
@@ -66,26 +71,20 @@ const hideColorOpts = function (jsDesignOpts){
     ) 
 }
 
-//display the "other" job title input field 
-jobRole_select.addEventListener("change", (e) => {
-    if (e.target.value === 'other'){
-        otherJob_input.style.display = 'block'
-    }else{
-        otherJob_input.style.display = "none"
-    }
-})
 
 //depending on the design selected, its correspondinig tShirt color options are display
 tShirtDesign_select.addEventListener("change", (e) => {
 
     tShirtColor_select.disabled = false
     resetTshirtColorDisplay(tShirtColor_colorOptions)
-
+    tShirtColor_select.value = tShirtColor_select.options[0].value
+  
     if (e.target.value === "js puns"){
         hideColorOpts(jsHeart_colorOptions)
     }
     else{
         hideColorOpts(jsPuns_colorOptions)
+        //resetTshirtColorDisplay(tShirtColor_colorOptions)
     }
 
 })
@@ -237,8 +236,6 @@ const cvvNumValidator = () => {
     return cvvNumisValid
 }
 
-
-
 //realTime valildation
 name_input.addEventListener('keyup', nameValidator)
 email_input.addEventListener('keyup', emailValidator)
@@ -259,15 +256,18 @@ form.addEventListener('submit', (e) => {
     if ( !activitiesValidator() ){
         e.preventDefault()
     }
-    if ( !ccNumValidator() ){
-        e.preventDefault()
+    if (isCredit){
+        if ( !ccNumValidator() ){
+            e.preventDefault()
+        }
+        if ( !zipNumValidator() ){
+            e.preventDefault()
+        }
+        if ( ! cvvNumValidator() ){
+            e.preventDefault()
+        }
     }
-    if ( !zipNumValidator() ){
-        e.preventDefault()
-    }
-    if ( ! cvvNumValidator() ){
-        e.preventDefault()
-    }
+    
  
 })
 
