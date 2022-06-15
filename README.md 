@@ -4,3 +4,4 @@ Using JavaScript, form validation, conditional behavior and interactivity is imp
 
 When validating the user input, a helpfull error message is displayed to aid the used enter valid information. 
 
+Name, email, and credit numbers, zip code, and cvv number have real time vilidation.  

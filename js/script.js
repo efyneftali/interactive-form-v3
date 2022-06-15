@@ -1,3 +1,6 @@
+// Threehouse FSJS Techdegree-Unit 3 Project Form Validation
+// June 2022
+
 //cache the DOM
 const form = document.querySelector("form")
 const name_input = document.getElementById("name")
@@ -10,6 +13,7 @@ const tShirtColor_colorOptions = document.querySelectorAll('[data-theme]') //nod
 const jsPuns_colorOptions = document.querySelectorAll('[data-theme="js puns"]') //node list
 const jsHeart_colorOptions = document.querySelectorAll('[data-theme="heart js"]') //node list
 const activities_fieldset = document.querySelector('#activities')
+const activities_box = document.querySelector("#activities-box")
 const activity_p = document.getElementById("activities-cost")
 const payment_select = document.getElementById("payment")
 const paymentOptions = payment_select.options 
@@ -19,10 +23,10 @@ const zip_input =  document.getElementById("zip")
 const cvv_input =  document.getElementById("cvv")
 const paypal_div = document.getElementById("paypal")
 const bitcoin_div = document.getElementById("bitcoin")
-const register_btn = document.querySelector('button[type=submit]')
+//const register_btn = document.querySelector('button[type=submit]')
 
 
-let checked = []
+let activitiesChecked = []
 let activityCost = 0
 let creditOptn = paymentOptions[1].value
 let isCredit = true
@@ -42,7 +46,7 @@ paypal_div.style.display = 'none'
 bitcoin_div.style.display = 'none'
 
 //disable submit btn
-register_btn.classList.add('disabled')
+//register_btn.classList.add('disabled')
 
 //function that resets the displace property for all color options
 const resetTshirtColorDisplay = function (tShirtColorOpts){
@@ -89,33 +93,44 @@ tShirtDesign_select.addEventListener("change", (e) => {
 
 //Calculate the total cost of the conference base on activities selected 
 activities_fieldset.addEventListener("change",(e) => {
-    
+    activitiesValidator()
     if (e.target.checked === true){ 
-         //add the first item clicked to the array of checked boxes
-        checked.push(e.target)
-
+         //add the first item clicked to the array of activitiesChecked boxes
+        activitiesChecked.push(e.target)
+        
         //access the cost of the event, add it to activity cost
         activityCost += parseInt(e.target.attributes["data-cost"].nodeValue)
-
         //add the cost of the activity only once, tally up total & display to UI
-        checked.forEach(item => {
-            if (!checked.includes(item)){
-                    checked.push(e.target)
-                    activityCost += parseInt(e.target.attributes["data-cost"].nodeValue)
-                    activity_p.innerHTML =  `Total: $${activityCost}`
-                        
-                }
-            })
+        activitiesChecked.forEach(item => {
+            if (!activitiesChecked.includes(item)){
+                activitiesChecked.push(e.target)
+                activityCost += parseInt(e.target.attributes["data-cost"].nodeValue)
+                activity_p.innerHTML =  `Total: $${activityCost}`      
+            }
+        })
+       activitiesValidator()
     }
     else{
-        //remove the item from the checked array if user changes their mind
-        checked.splice(checked.indexOf(e.target),1)
-
+        //remove the item from the activitiesChecked array if user changes their mind
+        activitiesChecked.splice(activitiesChecked.indexOf(e.target),1)
+        
         // sumbtract from the total, display total to UI
         activityCost -= parseInt(e.target.attributes["data-cost"].nodeValue) 
-        activity_p.innerHTML =  `Total: $${activityCost}`  
+        activity_p.innerHTML =  `Total: $${activityCost}`
+        activitiesValidator()  
     }
     activity_p.innerHTML =  `Total: $${activityCost}`
+})
+
+// focuses on each checkbox when selected 
+const activitiesCB = [...document.querySelectorAll('#activities input')]
+activitiesCB.forEach(cb => {
+    cb.addEventListener('focus', e => cb.parentElement.classList.add('focus'));
+  
+    cb.addEventListener('blur', e => {
+      const active = document.querySelector('.focus');
+      if (active) active.classList.remove('focus');
+    })
 })
 
 payment_select.addEventListener("change", (e)=>{
@@ -140,95 +155,119 @@ payment_select.addEventListener("change", (e)=>{
         creditCard_div.style.display = "block"
         bitcoin_div.style.display = 'none'
         paypal_div.style.display = 'none'
-
     }
-    
-    
 }) 
 
 // Validation helper functions
+const validationPass = (elmnt) => {
+    elmnt.parentElement.classList.add("valid")
+    elmnt.parentElement.classList.remove("not-valid")
+    elmnt.parentElement.lastElementChild.style.display = 'none'
+}
+
+const validationFail = (elmnt) =>{
+    elmnt.parentElement.classList.add("not-valid")
+    elmnt.parentElement.classList.remove("valid")
+    elmnt.parentElement.lastElementChild.style.display = 'block'
+    //register_btn.classList.add('disabled')
+}
+
+
 const nameValidator = () => {
-    const nameValue = name_input.value
-
-    //regex to check for non empty string
-    const regex = /^(?!\s*$).+/
-    const nameIsValid = regex.test(nameValue)
+    const nameIsValid = /^[a-zA-Z]+ ?[a-zA-Z]*? ?[a-zA-Z]*?$/.test(name_input.value)
+    
+    if(nameIsValid){
+        validationPass(name_input)
+    }else{
+        validationFail(name_input)
+    }
     return nameIsValid
-   
-
 } 
 
 const emailValidator = () => {
-    const emailValue = email_input.value
-    const emailIsValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue)
+    const emailIsValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(email_input.value)
+
+    if(emailIsValid){
+        validationPass(email_input)
+    }else{
+        validationFail(email_input)
+    }
     return emailIsValid 
 }
-
-const creditCardValidator = () => {
-    const ccNum = cc_input.value
-    const zipNum = zip_input.value
-    const cvvNum = cvv_input.value
-   
-    const ccNumisValid = /^\d{16}$/.test(ccNum)
-    const zipNumisValid = /^\d{5}$/.test(zipNum)
-    const cvvNumisValid = /^\d{3}$/.test(cvvNum)
-
-    return ccNumisValid && zipNumisValid && cvvNumisValid
-    // console.log(ccNum)
-    // console.log(zipNum)
-    // console.log(cvvNum)
-    // console.log(ccNumisValid)
-    // console.log(zipNumisValid)
-    // console.log(cvvNumisValid)
-    
-    
-
+const activitiesValidator = () => {
+    const activitiesIsValid = activitiesChecked.length > 0
+    if(activitiesIsValid){
+        validationPass(activities_box)
+    }else{
+        validationFail(activities_box)
+    }
+    return  activitiesIsValid
 }
 
+const ccNumValidator = () => {
+    const ccNumisValid = /^\d{13}|\d{16}$/.test(cc_input.value)
+    if(ccNumisValid){
+        validationPass(cc_input)
+    }else{
+        validationFail(cc_input)
+    }
+    return ccNumisValid 
+}
+
+const zipNumValidator = () => {
+    const zipNumisValid = /^\d{5}$/.test(zip_input.value)
+    if( zipNumisValid){
+        validationPass(zip_input)
+    }else{
+        validationFail(zip_input)
+    }
+    return zipNumisValid
+}
+
+const cvvNumValidator = () => {
+
+    const cvvNumisValid = /^\d{3}$/.test(cvv_input.value)
+
+    if(cvvNumisValid){
+        validationPass(cvv_input)
+    }else{
+        validationFail(cvv_input)
+    }
+    
+    return cvvNumisValid
+}
+
+
+
+//realTime valildation
+name_input.addEventListener('keyup', nameValidator)
+email_input.addEventListener('keyup', emailValidator)
+activities_box.addEventListener('keyup', activitiesValidator)
+cc_input.addEventListener('keyup', ccNumValidator)
+zip_input.addEventListener('keyup', zipNumValidator)
+cvv_input.addEventListener('keyup', cvvNumValidator)
 
 // submit listener on the form element
 form.addEventListener('submit', (e) => {
-    
-    // IMPORTANT NOTE: Firing the submit event will refresh the page and reset the form, erasing your log statements.
-    // This can be prevented by calling `e.preventDefault()` here in this submit handler, or
-    // by clicking on the gear icon in the upper right hand corner of the Chrome DevTools console to enter the settings menu,
-    // locating the "Console" section and selecting the "Preserve log upon navigation" option.
-
-    // IMPORTANT NOTE: If you call `e.preventDefault()` outside of a conditional, keep in mind that when this exercise is completed, 
-    // the form submission should only be prevented if one or more of the required fields is invalid.  
-    // Otherwise the form should be allowed to submit.  But it's okay to temporarily disrupt that behavior for testing purposes.
-
-    // IMPORTANT NOTE: Also keep in mind that the form's submission behavior will differ depending on whether
-    // this project is being live served with a server or just viewed locally in the browser.
-
-    
-    // Preventing form submission for testing purposes. Remove or comment out as needed and before completion
-
-    //e.preventDefault()
-
-    //check if the submit handler is working if 
-    
-    //console.log(name_input.value)
-    // nameValidator()
-    // emailValidator()
-    // console.log(creditCardValidator())
-    
-    //
-    //if isCredit run credit validator if this is true otherwise dont run it 
-    if (nameValidator() && emailValidator() && activityCost > 0 && creditCardValidator() ){
-        register_btn.classList.remove('disabled')
-        e.preventDefault()
-    }else{
-        register_btn.classList.add('disabled')
+     
+    if ( !nameValidator() ){
         e.preventDefault()
     }
-    
-
-    //console.log('Submit handler is functional!')
-    //if any of the validation is false prevent the submission event
-        //e.preventDefault()
-
-    //else allow the user to sumit his info
-        //
-    
+    if ( !emailValidator() ){
+        e.preventDefault()
+    }
+    if ( !activitiesValidator() ){
+        e.preventDefault()
+    }
+    if ( !ccNumValidator() ){
+        e.preventDefault()
+    }
+    if ( !zipNumValidator() ){
+        e.preventDefault()
+    }
+    if ( ! cvvNumValidator() ){
+        e.preventDefault()
+    }
+ 
 })
+
